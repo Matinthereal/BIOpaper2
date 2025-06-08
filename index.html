@@ -602,16 +602,32 @@
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
                             <h5 class="font-bold text-lg text-stone-800 mb-2">The Carbon Cycle</h5>
-                            <div class="flex flex-col items-center space-y-2">
+                            <div class="flex flex-col items-center space-y-2 p-4 bg-gray-50 rounded-lg shadow-inner">
                                 <div class="flow-diagram-box">Atmospheric CO₂</div>
-                                <div class="flow-diagram-arrow"></div>
-                                <div class="flow-diagram-box">Photosynthesis (Plants absorb CO₂)</div>
-                                <div class="flow-diagram-arrow"></div>
-                                <div class="flow-diagram-box">Biomass (Plants & Animals)</div>
-                                <div class="flow-diagram-arrow"></div>
-                                <div class="flow-diagram-box">Decomposition & Respiration / Combustion</div>
-                                <div class="flow-diagram-arrow rotate-90 hidden md:block w-full"></div> <!-- Visual break -->
-                                <div class="flow-diagram-box">Fossil Fuels</div>
+                                <div class="flow-diagram-arrow"></div> <!-- Arrow down: Photosynthesis -->
+                                <div class="flow-diagram-box">Plants (absorb CO₂ via Photosynthesis)</div>
+                                <div class="flow-diagram-arrow"></div> <!-- Arrow down: Consumption -->
+                                <div class="flow-diagram-box">Animals (consume plants)</div>
+                                <div class="flow-diagram-arrow"></div> <!-- Arrow down: Death & Waste -->
+                                <div class="flow-diagram-box">Dead Organic Matter / Waste</div>
+                                
+                                <!-- This is where the cycle splits into decomposition/respiration and fossilization -->
+                                <div class="flex justify-between w-full mt-4">
+                                    <div class="flex flex-col items-center w-1/2">
+                                        <div class="flow-diagram-arrow"></div> <!-- Arrow down: Decomposition & Respiration -->
+                                        <div class="flow-diagram-box">Decomposition & Respiration</div>
+                                    </div>
+                                    <div class="flex flex-col items-center w-1/2">
+                                        <div class="flow-diagram-arrow"></div> <!-- Arrow down: Fossilization -->
+                                        <div class="flow-diagram-box">Fossil Fuels</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Arrows and text to indicate return to atmosphere -->
+                                <div class="interactive-diagram-arrow loop-back mx-auto mt-8" style="height: 30px;"></div>
+                                <p class="text-stone-700 text-center font-semibold mt-2">
+                                    Carbon returns to the atmosphere from all these sources.
+                                </p>
                             </div>
                             <p class="mt-4 text-stone-700">
                                 Human impacts on the carbon cycle are a major concern:
