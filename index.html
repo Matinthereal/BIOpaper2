@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive GCSE Biology Paper 2 Revision Website</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Forest & Moss (Main background: #fafaf9, Card background: #ffffff, Text: #292524, Accents: #4d7c0f (Moss Green/Lime-700), #065f46 (Forest Green/Emerald-800), #022c22 (Darker Forest Green/Emerald-900)) -->
+    <!-- Application Structure Plan: A single-page application with a fixed navigation bar at the top, allowing quick access to key sections: Homeostasis & Response, Inheritance & Evolution, Ecology, Required Practicals, and Exam Technique. This modular, thematic approach enhances usability for focused revision sessions. Each section is broken down into `topic-card` components, which can contain static detailed text, interactive diagrams, dynamic charts, or togglable information (`<details>` tags). This structure prioritizes information discoverability and allows users to progressively reveal deeper layers of detail (e.g., via interactive elements or expandable sections) without overwhelming them. The chosen structure is ideal for high-level revision as it allows for both a broad overview and deep dives into specific sub-topics, catering to different revision needs. -->
+    <!-- Visualization & Content Choices: 
+        - Homeostasis - Blood Glucose Regulation: Goal: Demonstrate negative feedback control. Method: Interactive HTML/CSS diagram with dynamic text and visual cues. Interaction: Buttons to simulate high/low blood sugar, updating the diagram and detailed explanations. Justification: Visualizes a core physiological process critical for higher marks.
+        - Homeostasis - Brain Function: Goal: Map brain regions to functions. Method: HTML/CSS brain outline with clickable 'hotspots'. Interaction: Clicking a hotspot reveals detailed information about that region's role. Justification: Aids memorization of complex anatomical functions.
+        - Homeostasis - Thermoregulation: Goal: Explain detailed mechanisms. Method: Expandable sections (`<details>`). Interaction: Toggling reveals in-depth explanations for responses to heat and cold. Justification: Allows for comprehensive detail without visual clutter.
+        - Inheritance - Punnett Square: Goal: Practice genetic crosses. Method: Interactive HTML form with a dynamic Punnett square. Interaction: User inputs parental genotypes, and the square updates with offspring genotypes and probabilities. Justification: Active learning for a quantitative genetics concept.
+        - Inheritance - Mitosis vs Meiosis: Goal: Compare cell division types. Method: Detailed comparison table. Interaction: Clear side-by-side presentation. Justification: Essential for distinguishing these fundamental processes.
+        - Ecology - Decomposition Rate: Goal: Visualize environmental impact on biological processes. Method: Chart.js line chart. Interaction: Slider controls temperature, showing its effect on decomposition rates via enzyme activity. Justification: Illustrates enzyme kinetics in an ecological context, linking Paper 1 and 2 concepts.
+        - Ecology - Carbon/Water Cycles: Goal: Illustrate complex cycles. Method: Detailed explanatory text with simple HTML/CSS diagrams (boxes and arrows). Interaction: Static diagrams support textual explanations. Justification: Visual aid for understanding continuous processes.
+        - Plant Hormones: Goal: List agricultural uses. Method: Interactive cards. Interaction: Clicking/hovering reveals details for each hormone. Justification: Quick reference and memorization tool.
+        - Required Practicals: Goal: Provide methodology and analysis points. Method: Structured text within topic cards, detailing IV, DV, control variables, and error analysis. Justification: Direct exam relevance, as practicals are frequently assessed.
+        - Exam Technique: Goal: Offer strategies for higher marks. Method: Expandable sections with specific tips for different question types. Interaction: Toggling reveals detailed advice. Justification: Directly supports the user's goal of achieving Grade 8+.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fafaf9; /* White-ish: Stone-50 */
+            color: #292524; /* Stone-800 */
+            line-height: 1.6;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #4d7c0f; /* Moss Green: Lime-700 */
+            border-bottom-color: #4d7c0f;
+        }
+        .topic-card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 6px 10px -3px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            padding: 1.5rem;
+        }
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px -5px rgba(0,0,0,0.1), 0 5px 8px -3px rgba(0,0,0,0.08);
+        }
+        .btn-primary {
+            background-color: #022c22; /* Darker Forest Green: Emerald-900 */
+            color: white;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover {
+            background-color: #065f46; /* Forest Green: Emerald-800 (slightly lighter for hover) */
+            transform: translateY(-1px);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .interactive-diagram-arrow {
+            position: relative; /* Essential for positioning ::after */
+            width: 100%;
+            height: 2px;
+            background-color: #a8a29e; /* Stone-400 */
+            margin: 0.75rem auto;
+            display: block; /* Ensures it behaves as a block element */
+        }
+        .interactive-diagram-arrow::after {
+            content: '►'; /* Right-pointing triangle */
+            position: absolute;
+            right: -5px; /* Position it slightly outside the line */
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.25rem;
+            color: #a8a29e; /* Stone-400 */
+        }
+        /* Class for arrows pointing back (conceptually left/up) */
+        .interactive-diagram-arrow.loop-back::after {
+            content: '▲'; /* Up-pointing triangle for conceptual loop-back */
+            left: 50%; /* Center horizontally */
+            right: auto;
+            bottom: auto; /* Reset bottom */
+            top: -5px; /* Position above the line */
+            transform: translateX(-50%);
+        }
+        .punnett-square td {
+            border: 1px solid #d6d3d1; /* Stone-300 */
+            width: 4.5rem;
+            height: 4.5rem;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            background-color: #fafaf9; /* Stone-50 */
+        }
+        .punnett-square th {
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 0.5rem;
+            background-color: #f5f5f4; /* Stone-100 */
+        }
+        .brain-outline {
+            position: relative;
+            width: 100%;
+            padding-top: 75%; /* Aspect ratio 4:3 (height/width * 100) */
+            background-color: #ecfdf5; /* Emerald-50 */
+            border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%; /* More brain-like shape */
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 2px solid #065f46; /* Forest Green border */
+        }
+        .brain-hotspot {
+            position: absolute;
+            background-color: rgba(6, 95, 70, 0.6); /* Forest Green with transparency */
+            border-radius: 50%;
+            border: 2px solid #065f46; /* Forest Green */
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem; /* Slightly smaller font for better fit */
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 0 3px rgba(0,0,0,0.5);
+            text-align: center;
+            padding: 0.2rem;
+            line-height: 1.1;
+        }
+        .brain-hotspot:hover {
+            background-color: rgba(6, 95, 70, 0.8);
+            border-color: #022c22; /* Darker Forest Green */
+            transform: scale(1.1);
+        }
+        /* Adjusted positioning and sizing for hotspots */
+        .brain-hotspot[data-brain="cortex"] { top: 15%; left: 25%; width: 50%; height: 50%; }
+        .brain-hotspot[data-brain="cerebellum"] { bottom: 8%; right: 15%; width: 25%; height: 20%; }
+        .brain-hotspot[data-brain="medulla"] { bottom: 0%; left: 25%; width: 15%; height: 10%; border-radius: 10px / 50%; }
+
+        details > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            background-color: #d1fae5; /* Emerald-100 */
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        details > summary:hover {
+            background-color: #a7f3d0; /* Emerald-200 */
+        }
+        details[open] > summary {
+            background-color: #6ee7b7; /* Emerald-300 */
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        details > p {
+            padding: 1rem;
+            background-color: #ecfdf5; /* Emerald-50 */
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+            border-top: 1px solid #6ee7b7; /* Emerald-300 */
+        }
+        .flow-diagram-box {
+            background-color: #ecfdf5; /* Emerald-50 */
+            border: 1px solid #a7f3d0; /* Emerald-200 */
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .flow-diagram-arrow {
+            width: 2px;
+            height: 20px;
+            background-color: #34d399; /* Emerald-400 */
+            margin: 0.5rem auto;
+            position: relative;
+        }
+        .flow-diagram-arrow::after {
+            content: '▼';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #34d399; /* Emerald-400 */
+        }
+        /* Custom class for hormone info reveal/hide */
+        .hormone-info {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+        }
+        .hormone-info.open {
+            max-height: 200px; /* Adjust as needed, ensure it's large enough */
+            opacity: 1;
+        }
+        /* Loading spinner styles */
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #065f46; /* Forest Green */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+            display: none; /* Hidden by default */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl md:text-2xl font-bold text-emerald-900">GCSE Biology Paper 2</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#homeostasis" class="nav-link px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Homeostasis</a>
+                        <a href="#inheritance" class="nav-link px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Inheritance</a>
+                        <a href="#ecology" class="nav-link px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Ecology</a>
+                        <a href="#practicals" class="nav-link px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Practicals</a>
+                        <a href="#exam-technique" class="nav-link px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Exam Technique</a>
+                        <a href="#ai-assistant" class="nav-link px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">AI Assistant ✨</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-stone-100 border border-stone-300 rounded-md p-2 text-sm">
+                        <option value="#homeostasis">Homeostasis & Response</option>
+                        <option value="#inheritance">Inheritance & Evolution</option>
+                        <option value="#ecology">Ecology</option>
+                        <option value="#practicals">Required Practicals</option>
+                        <option value="#exam-technique">Exam Technique</option>
+                        <option value="#ai-assistant">AI Assistant ✨</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <!-- Introduction -->
+        <section class="text-center mb-20 bg-lime-50 rounded-2xl p-8 shadow-inner">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-emerald-900 tracking-tight">The Ultimate Grade 8+ Revision Guide</h2>
+            <p class="mt-4 max-w-4xl mx-auto text-lg md:text-xl text-stone-700">Master GCSE Triple Biology Paper 2 with detailed content, interactive tools, and expert exam technique advice. Aim for excellence!</p>
+        </section>
+
+        <!-- Topic 1: Homeostasis and Response -->
+        <section id="homeostasis" class="mb-20 scroll-mt-20">
+            <h3 class="text-3xl font-bold mb-6 text-stone-800">1. Homeostasis & Response: Maintaining Internal Balance</h3>
+            <p class="mb-8 text-lg text-stone-600">Homeostasis is the dynamic process of maintaining stable internal conditions, crucial for optimal enzyme activity and overall organism survival. This section explores the complex feedback loops and coordinating systems that keep the body's internal environment constant.</p>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Blood Glucose Regulation -->
+                <div class="topic-card lg:col-span-2">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Interactive: Blood Glucose Regulation (Negative Feedback)</h4>
+                    <p class="mb-4 text-stone-700">Explore how the body maintains stable blood glucose levels using insulin and glucagon. This negative feedback loop is a common high-mark question in exams.</p>
+                    <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+                        <button id="btn-high-sugar" class="btn-primary px-4 py-2 rounded-lg font-semibold shadow">Simulate High Blood Sugar</button>
+                        <button id="btn-low-sugar" class="btn-primary px-4 py-2 rounded-lg font-semibold shadow">Simulate Low Blood Sugar</button>
+                    </div>
+                    <div id="glucose-diagram" class="space-y-3 text-center text-stone-800 bg-gray-50 p-4 rounded-lg">
+                        <div class="p-2 bg-emerald-100 rounded-lg border border-emerald-200">Normal Blood Glucose (e.g., 5 mmol/L)</div>
+                        <div class="interactive-diagram-arrow mx-auto max-w-xs"></div>
+                        <div id="glucose-stimulus" class="p-2 bg-lime-100 rounded-lg font-semibold border border-lime-200">Select a scenario above to begin...</div>
+                        <div class="interactive-diagram-arrow mx-auto max-w-xs"></div>
+                        <div class="p-2 bg-teal-100 rounded-lg border border-teal-200">Detected by Pancreas (Islets of Langerhans)</div>
+                        <div class="interactive-diagram-arrow mx-auto max-w-xs"></div>
+                        <div id="glucose-hormone" class="p-2 bg-blue-100 rounded-lg border border-blue-200"></div>
+                        <div class="interactive-diagram-arrow mx-auto max-w-xs loop-back"></div> <!-- Added loop-back class -->
+                        <div id="glucose-effect" class="p-2 bg-orange-100 rounded-lg border border-orange-200"></div>
+                        <div class="p-2 bg-emerald-100 rounded-lg border border-emerald-200">Return to Normal Blood Glucose</div>
+                    </div>
+                </div>
+
+                <!-- Nervous vs Endocrine System -->
+                <div class="topic-card">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Nervous vs. Endocrine System: A Key Comparison</h4>
+                    <p class="mb-4 text-stone-700">Both systems coordinate body responses, but their mechanisms differ significantly. Understanding these distinctions is vital for detailed explanations.</p>
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b-2 border-stone-300">
+                                <th class="py-2 text-stone-800">Feature</th>
+                                <th class="py-2 text-stone-800">Nervous System</th>
+                                <th class="py-2 text-stone-800">Endocrine System</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-stone-200"><td class="py-2 font-semibold">Signal Type</td><td>Electrical impulses</td><td>Chemical (Hormones)</td></tr>
+                            <tr class="border-b border-stone-200"><td class="py-2 font-semibold">Transmission</td><td>Neurons (Synapses)</td><td>Bloodstream</td></tr>
+                            <tr class="border-b border-stone-200"><td class="py-2 font-semibold">Speed</td><td>Very Fast</td><td>Slower</td></tr>
+                            <tr class="border-b border-stone-200"><td class="py-2 font-semibold">Duration</td><td>Short-lived</td><td>Longer-lasting</td></tr>
+                            <tr class="border-b border-stone-200"><td class="py-2 font-semibold">Target</td><td>Precise, localized</td><td>Widespread, general</td></tr>
+                            <tr><td class="py-2 font-semibold">Examples</td><td>Reflexes, muscle control</td><td>Blood sugar, growth</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Brain Function -->
+                <div class="topic-card lg:col-span-3">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Interactive: The Human Brain & Its Functions</h4>
+                    <p class="mb-4 text-stone-700">The brain is the control center. Click on the highlighted regions to learn about their specific roles. Damage to these areas can have severe consequences, often tested in exams.</p>
+                    <div class="flex flex-col md:flex-row items-center gap-8">
+                        <div class="w-full md:w-1/2 flex justify-center">
+                            <div class="brain-outline">
+                                <button data-brain="cortex" class="brain-hotspot">Cerebral Cortex</button>
+                                <button data-brain="cerebellum" class="brain-hotspot">Cerebellum</button>
+                                <button data-brain="medulla" class="brain-hotspot">Medulla Oblongata</button>
+                            </div>
+                        </div>
+                        <div id="brain-info" class="w-full md:w-1/2 p-6 bg-stone-100 rounded-lg min-h-[200px] flex items-center justify-center border border-stone-200 shadow-inner">
+                            <p class="text-stone-600 text-lg">Click a region on the brain to learn more about its function.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thermoregulation -->
+                <div class="topic-card md:col-span-1">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Thermoregulation: Controlling Body Temperature</h4>
+                    <p class="mb-4 text-stone-700">The body maintains a constant core temperature of approximately 37°C for optimal enzyme activity. Key mechanisms involve the skin, blood vessels, and muscles, coordinated by the hypothalamus.</p>
+                    <details class="mb-3">
+                        <summary>Responses to Overheating</summary>
+                        <p class="text-stone-700">
+                            When too hot, the body responds by:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Vasodilation:</strong> Arterioles (small arteries) near the skin widen, increasing blood flow to the surface. This allows more heat to radiate away.</li>
+                                <li><strong>Sweating:</strong> Sweat glands produce sweat, which evaporates from the skin, taking heat with it.</li>
+                                <li><strong>Hairs lie flat:</strong> Reduces insulation.</li>
+                                <li><strong>Reduced metabolic rate:</strong> Less heat generated by chemical reactions.</li>
+                            </ul>
+                        </p>
+                    </details>
+                    <details>
+                        <summary>Responses to Cooling</summary>
+                        <p class="text-stone-700">
+                            When too cold, the body responds by:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Vasoconstriction:</strong> Arterioles near the skin constrict, reducing blood flow to the surface. This conserves heat.</li>
+                                <li><strong>Shivering:</strong> Muscles contract rapidly, generating heat through respiration.</li>
+                                <li><strong>Hairs stand on end:</strong> Traps a layer of insulating air (less effective in humans).</li>
+                                <li><strong>Increased metabolic rate:</strong> More heat generated by chemical reactions.</li>
+                            </ul>
+                        </p>
+                    </details>
+                </div>
+                
+                <!-- Water and Nitrogen Balance (Kidneys) -->
+                <div class="topic-card md:col-span-2">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Water & Nitrogen Balance: The Kidneys' Role</h4>
+                    <p class="mb-4 text-stone-700">The kidneys are vital for osmoregulation (water balance) and excretion of nitrogenous waste (urea). Understanding their mechanisms is crucial for higher grades.</p>
+                    <details class="mb-3">
+                        <summary>Kidney Function: Filtration & Reabsorption</summary>
+                        <p class="text-stone-700">
+                            Blood is filtered in the glomerulus (part of the nephron), forming a 'filtrate' containing water, salts, glucose, amino acids, and urea. Then, selective reabsorption occurs in the tubules:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>All glucose & amino acids</strong> are reabsorbed (active transport).</li>
+                                <li><strong>Most water & some salts</strong> are reabsorbed based on body's needs.</li>
+                                <li><strong>Urea</strong> is largely excreted.</li>
+                            </ul>
+                            This process ensures essential substances are retained while waste and excess water are removed as urine.
+                        </p>
+                    </details>
+                    <details>
+                        <summary>ADH & Water Reabsorption (Osmoregulation)</summary>
+                        <p class="text-stone-700">
+                            Antidiuretic Hormone (ADH) controls the permeability of collecting ducts in the kidneys.
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>If dehydrated (low water potential in blood):</strong> Hypothalamus detects, pituitary releases MORE ADH. Collecting ducts become MORE permeable, MORE water reabsorbed into blood, producing a SMALL volume of CONCENTRATED urine.</li>
+                                <li><strong>If over-hydrated (high water potential in blood):</strong> Hypothalamus detects, pituitary releases LESS ADH. Collecting ducts become LESS permeable, LESS water reabsorbed, producing a LARGE volume of DILUTE urine.</li>
+                            </ul>
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2: Inheritance, Variation and Evolution -->
+        <section id="inheritance" class="mb-20 scroll-mt-20">
+            <h3 class="text-3xl font-bold mb-6 text-stone-800">2. Inheritance, Variation & Evolution: The Blueprint of Life</h3>
+            <p class="mb-8 text-lg text-stone-600">This section explores how genetic information is passed down, the origins of variation, and the powerful mechanism of evolution by natural selection. Mastering genetic crosses and understanding DNA's role are key for higher marks.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- DNA Structure & Function -->
+                <div class="topic-card lg:col-span-1">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">DNA: Structure and Protein Synthesis</h4>
+                    <p class="mb-4 text-stone-700">DNA carries the genetic code. Understanding its structure and how it leads to protein synthesis is essential.</p>
+                    <details class="mb-3">
+                        <summary>DNA Structure (Double Helix)</summary>
+                        <p class="text-stone-700">
+                            DNA is a polymer made of repeating nucleotide units. Each nucleotide has:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li>A phosphate group</li>
+                                <li>A deoxyribose sugar</li>
+                                <li>One of four nitrogenous bases: Adenine (A), Thymine (T), Guanine (G), Cytosine (C).</li>
+                            </ul>
+                            The two strands are joined by complementary base pairing: A always pairs with T, and G always pairs with C. This forms the double helix structure.
+                        </p>
+                    </details>
+                    <details>
+                        <summary>Brief: Protein Synthesis (Transcription & Translation)</summary>
+                        <p class="text-stone-700">
+                            The sequence of bases in DNA codes for amino acids, which make up proteins.
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Transcription:</strong> A messenger RNA (mRNA) copy of a gene is made in the nucleus.</li>
+                                <li><strong>Translation:</strong> The mRNA moves to a ribosome in the cytoplasm. Transfer RNA (tRNA) molecules bring specific amino acids to the ribosome, matching their anticodons to the codons on the mRNA. The amino acids are joined in sequence to form a protein.</li>
+                            </ul>
+                        </p>
+                    </details>
+                </div>
+
+                <!-- Punnett Square -->
+                <div class="topic-card lg:col-span-2">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Interactive: Punnett Square & Genetic Crosses</h4>
+                    <p class="mb-4 text-stone-700">Practice predicting genotype and phenotype probabilities. Use any dominant (uppercase) and recessive (lowercase) allele, e.g., 'A' and 'a'.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                        <div class="w-full sm:w-1/2">
+                            <label for="parent1-punnett" class="font-semibold text-stone-800">Parent 1 Genotype:</label>
+                            <select id="parent1-punnett" class="w-full mt-1 p-2 border border-stone-300 rounded-md bg-stone-50">
+                                <option value="AA">AA (Homozygous Dominant)</option>
+                                <option value="Aa" selected>Aa (Heterozygous)</option>
+                                <option value="aa">aa (Homozygous Recessive)</option>
+                            </select>
+                        </div>
+                        <div class="w-full sm:w-1/2">
+                            <label for="parent2-punnett" class="font-semibold text-stone-800">Parent 2 Genotype:</label>
+                            <select id="parent2-punnett" class="w-full mt-1 p-2 border border-stone-300 rounded-md bg-stone-50">
+                                <option value="AA">AA (Homozygous Dominant)</option>
+                                <option value="Aa">Aa (Heterozygous)</option>
+                                <option value="aa" selected>aa (Homozygous Recessive)</option>
+                            </select>
+                        </div>
+                    </div>
+                     <table class="punnett-square mx-auto my-4 shadow-md rounded-lg overflow-hidden">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th id="p2a1-th"></th>
+                                <th id="p2a2-th"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th id="p1a1-th"></th>
+                                <td id="sq1"></td>
+                                <td id="sq2"></td>
+                            </tr>
+                            <tr>
+                                <th id="p1a2-th"></th>
+                                <td id="sq3"></td>
+                                <td id="sq4"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="punnett-results" class="mt-4 text-center font-bold text-lg text-lime-700 p-3 bg-lime-50 rounded-lg border border-lime-200"></div>
+                </div>
+
+                <!-- Mitosis vs Meiosis -->
+                <div class="topic-card lg:col-span-3">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Cell Division: Mitosis vs. Meiosis (Detailed Comparison)</h4>
+                    <p class="mb-4 text-stone-700">These fundamental processes underpin growth, repair, and reproduction. Distinguishing them is crucial for higher-level answers.</p>
+                     <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b-2 border-stone-300 bg-stone-100">
+                                <th class="py-2 px-3 text-stone-800">Feature</th>
+                                <th class="py-2 px-3 text-stone-800">Mitosis</th>
+                                <th class="py-2 px-3 text-stone-800">Meiosis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-stone-200"><td class="py-2 px-3 font-semibold">Purpose</td><td>Growth, repair, asexual reproduction</td><td>Gamete production for sexual reproduction</td></tr>
+                            <tr class="border-b border-stone-200"><td class="py-2 px-3 font-semibold">Number of Divisions</td><td>One</td><td>Two</td></tr>
+                            <tr class="border-b border-stone-200"><td class="py-2 px-3 font-semibold">Daughter Cells Produced</td><td>Two</td><td>Four</td></tr>
+                            <tr class="border-b border-stone-200"><td class="py-2 px-3 font-semibold">Chromosome Number (Daughter)</td><td>Diploid (2n) - same as parent</td><td>Haploid (n) - half of parent</td></tr>
+                            <tr class="border-b border-stone-200"><td class="py-2 px-3 font-semibold">Genetic Identity</td><td>Genetically identical to parent cell</td><td>Genetically different from parent and each other</td></tr>
+                            <tr><td class="py-2 px-3 font-semibold">Significance of Difference</td><td>Maintains chromosome number, ensures exact copies</td><td>Creates genetic variation, restores diploid number at fertilisation</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Evolution & Natural Selection -->
+                <div class="topic-card md:col-span-2 lg:col-span-3">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Evolution by Natural Selection: The Driving Force of Change</h4>
+                    <p class="mb-4 text-stone-700">This cornerstone of biology explains how species adapt over time. Memorize the steps to explain it clearly in 6-mark questions.</p>
+                    <ol class="list-decimal list-inside space-y-3 pl-4 text-stone-700">
+                        <li><strong>Variation:</strong> Within any population, individuals show natural genetic variation. This is due to mutations and, in sexual reproduction, new combinations of alleles. For example, some bacteria might have a mutation making them resistant to an antibiotic.</li>
+                        <li><strong>Competition:</strong> Organisms produce more offspring than can survive. This leads to a struggle for existence, competing for limited resources (food, space, mates) and avoiding predators/disease.</li>
+                        <li><strong>Selection Pressure:</strong> Environmental conditions (e.g., presence of an antibiotic, climate change, new predator) exert a selective pressure.</li>
+                        <li><strong>Survival of the Fittest (Differential Survival):</strong> Individuals with advantageous characteristics (adaptations) that suit the environment are more likely to survive and reproduce. For instance, antibiotic-resistant bacteria survive treatment.</li>
+                        <li><strong>Inheritance:</strong> These advantageous alleles are passed on to their offspring.</li>
+                        <li><strong>Evolution:</strong> Over many generations, the frequency of the advantageous allele increases in the population, leading to a change in the characteristics of the population. This can eventually lead to the formation of new species.</li>
+                    </ol>
+                    <details class="mt-4">
+                        <summary>Evidence for Evolution</summary>
+                        <p class="text-stone-700">
+                            Key lines of evidence supporting evolution include:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Fossil Record:</strong> Shows gradual changes in organisms over geological time, and transitional forms.</li>
+                                <li><strong>Comparative Anatomy:</strong> Similar bone structures (homologous structures) in different species suggest a common ancestor.</li>
+                                <li><strong>DNA & Molecular Biology:</strong> Similarities in DNA and protein sequences among diverse organisms.</li>
+                                <li><strong>Antibiotic Resistance in Bacteria:</strong> A real-time observable example of natural selection.</li>
+                                <li><strong>Selective Breeding:</strong> Humans selecting desired traits in plants/animals over generations.</li>
+                            </ul>
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3: Ecology -->
+        <section id="ecology" class="mb-20 scroll-mt-20">
+            <h3 class="text-3xl font-bold mb-6 text-stone-800">3. Ecology: Interconnected Systems & Environmental Challenges</h3>
+            <p class="mb-8 text-lg text-stone-600">Ecology examines the complex web of interactions in ecosystems, the cycling of essential materials, and the critical impact of human activities on biodiversity and the environment. This section covers fundamental concepts and key environmental issues.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Decomposition Rate -->
+                <div class="topic-card lg:col-span-2">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Interactive: Factors Affecting Decomposition Rate</h4>
+                    <p class="mb-4 text-stone-700">Decomposition is vital for nutrient cycling. Its rate is heavily influenced by factors like temperature, as it impacts enzyme activity in microorganisms. Observe how mass lost changes with temperature.</p>
+                    <div class="mb-4">
+                        <label for="temp-slider" class="font-semibold text-stone-800">Temperature: <span id="temp-value" class="font-bold text-lime-700 text-xl">25</span>°C</label>
+                        <input id="temp-slider" type="range" min="0" max="60" value="25" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer thumb-emerald-600">
+                    </div>
+                    <div class="chart-container border border-stone-200 rounded-lg p-2 shadow-inner">
+                        <canvas id="decomposition-chart"></canvas>
+                    </div>
+                    <details class="mt-4">
+                        <summary>Other Factors Affecting Decomposition</summary>
+                        <p class="text-stone-700">
+                            Besides temperature, other factors influence decay:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Oxygen Availability:</strong> Most decomposers are aerobic and need oxygen. Lack of oxygen (e.g., waterlogged soil) slows decay.</li>
+                                <li><strong>Water Availability:</strong> Decomposers need water to survive and carry out metabolic processes. Too dry, and activity slows; too wet, and oxygen might be limited.</li>
+                                <li><strong>pH:</strong> Optimal pH range for decomposer enzymes. Extreme pH can denature enzymes.</li>
+                                <li><strong>Number of Microorganisms:</strong> More decomposers mean faster breakdown.</li>
+                            </ul>
+                        </p>
+                    </details>
+                </div>
+                 <!-- Plant Hormones -->
+                <div class="topic-card">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Plant Hormones in Agriculture (Uses)</h4>
+                    <p class="mb-4 text-stone-700">Farmers utilize plant hormones to enhance crop production and manage plant growth. Click on each hormone for details.</p>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-emerald-100 rounded-lg border border-emerald-200 cursor-pointer transition transform hover:scale-105" onclick="toggleHormoneInfo('auxin-info')">
+                            <h5 class="font-bold text-lg text-emerald-800">Auxins</h5>
+                            <div id="auxin-info" class="hormone-info mt-2 text-emerald-700">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li><strong>Rooting powder:</strong> Stimulates root growth in cuttings.</li>
+                                    <li><strong>Weedkillers:</strong> Selective herbicides (e.g., 2,4-D) disrupt broad-leaved plant growth.</li>
+                                    <li><strong>Fruit ripening/dropping:</strong> Influences fruit development and detachment.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-lime-100 rounded-lg border border-lime-200 cursor-pointer transition transform hover:scale-105" onclick="toggleHormoneInfo('gibberellin-info')">
+                            <h5 class="font-bold text-lg text-lime-800">Gibberellins</h5>
+                            <div id="gibberellin-info" class="hormone-info mt-2 text-lime-700">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li><strong>Break dormancy:</strong> Promote seed germination.</li>
+                                    <li><strong>Increase fruit size:</strong> Especially in grapes.</li>
+                                    <li><strong>Promote flowering:</strong> Induce flowering in some plants, extending growing season.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-red-100 rounded-lg border border-red-200 cursor-pointer transition transform hover:scale-105" onclick="toggleHormoneInfo('ethene-info')">
+                            <h5 class="font-bold text-lg text-red-800">Ethene (Ethylene)</h5>
+                            <div id="ethene-info" class="hormone-info mt-2 text-red-700">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li><strong>Fruit ripening:</strong> Controls ripening during storage and transport.</li>
+                                    <li><strong>Fruit dropping:</strong> Promotes fruit detachment.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cycles: Carbon & Water -->
+                <div class="topic-card lg:col-span-3">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Ecosystem Cycles: Carbon & Water</h4>
+                    <p class="mb-4 text-stone-700">Essential elements continuously cycle through ecosystems. Understanding these cycles is vital for environmental science.</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h5 class="font-bold text-lg text-stone-800 mb-2">The Carbon Cycle</h5>
+                            <div class="flex flex-col items-center space-y-2">
+                                <div class="flow-diagram-box">Atmospheric CO₂</div>
+                                <div class="flow-diagram-arrow"></div>
+                                <div class="flow-diagram-box">Photosynthesis (Plants absorb CO₂)</div>
+                                <div class="flow-diagram-arrow"></div>
+                                <div class="flow-diagram-box">Biomass (Plants & Animals)</div>
+                                <div class="flow-diagram-arrow"></div>
+                                <div class="flow-diagram-box">Decomposition & Respiration / Combustion</div>
+                                <div class="flow-diagram-arrow rotate-90 hidden md:block w-full"></div> <!-- Visual break -->
+                                <div class="flow-diagram-box">Fossil Fuels</div>
+                            </div>
+                            <p class="mt-4 text-stone-700">
+                                Human impacts on the carbon cycle are a major concern:
+                                <ul class="list-disc list-inside mt-2 space-y-1">
+                                    <li><strong>Burning Fossil Fuels:</strong> Releases large amounts of stored carbon dioxide.</li>
+                                    <li><strong>Deforestation:</strong> Reduces the number of trees that absorb CO₂ during photosynthesis, leading to higher atmospheric levels.</li>
+                                </ul>
+                            </p>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-lg text-stone-800 mb-2">The Water Cycle (Simplified)</h5>
+                             <div class="flex flex-col items-center space-y-2">
+                                <div class="flow-diagram-box">Evaporation (from oceans/lakes) & Transpiration (from plants)</div>
+                                <div class="flow-diagram-arrow"></div>
+                                <div class="flow-diagram-box">Condensation (clouds form)</div>
+                                <div class="flow-diagram-arrow"></div>
+                                <div class="flow-diagram-box">Precipitation (rain, snow)</div>
+                                <div class="flow-diagram-arrow"></div>
+                                <div class="flow-diagram-box">Run-off & Groundwater / Collection (oceans, lakes)</div>
+                            </div>
+                            <p class="mt-4 text-stone-700">
+                                The water cycle is essential for all life, ensuring a continuous supply of fresh water. Human activities can impact it through:
+                                <ul class="list-disc list-inside mt-2 space-y-1">
+                                    <li>Pollution of water sources.</li>
+                                    <li>Deforestation (reduces transpiration, affecting local rainfall).</li>
+                                    <li>Large-scale water extraction for agriculture/industry.</li>
+                                </ul>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biodiversity & Human Impact -->
+                <div class="topic-card lg:col-span-3">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-4">Biodiversity, Conservation & Human Impact</h4>
+                    <p class="mb-4 text-stone-700">Biodiversity is the variety of all living organisms. Human activities pose significant threats, but conservation efforts aim to protect it.</p>
+                    <details class="mb-3">
+                        <summary>Threats to Biodiversity</summary>
+                        <p class="text-stone-700">
+                            Major human activities threatening biodiversity include:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Deforestation:</strong> Habitat destruction for agriculture, logging, urbanization.</li>
+                                <li><strong>Pollution:</strong> Air, water, and land pollution harming ecosystems and species.</li>
+                                <li><strong>Global Warming:</strong> Climate change altering habitats, forcing species migration or extinction.</li>
+                                <li><strong>Over-exploitation:</strong> Overfishing, hunting, or harvesting beyond sustainable levels.</li>
+                                <li><strong>Habitat Loss & Fragmentation:</strong> Breaking up natural habitats into smaller, isolated pieces.</li>
+                            </ul>
+                        </p>
+                    </details>
+                    <details>
+                        <summary>Conservation & Sustainable Practices</summary>
+                        <p class="text-stone-700">
+                            Strategies to protect biodiversity and ensure sustainable use of resources:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Fishing Quotas:</strong> Limits on fish catch to allow populations to recover and breed.</li>
+                                <li><strong>Net Size Legislation:</strong> Preventing capture of juvenile fish.</li>
+                                <li><strong>Breeding Programmes:</strong> In zoos and nature reserves for endangered species.</li>
+                                <li><strong>Protected Areas:</strong> National parks, nature reserves.</li>
+                                <li><strong>Recycling & Waste Management:</strong> Reducing landfill and pollution.</li>
+                                <li><strong>Genetic Modification (GM) Crops:</strong> Can increase yield on existing land, reducing pressure on natural habitats (though ethical debates exist).</li>
+                                <li><strong>Sustainable Agriculture:</strong> Organic farming, crop rotation, reduced pesticide use.</li>
+                            </ul>
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Required Practicals -->
+        <section id="practicals" class="mb-20 scroll-mt-20">
+            <h3 class="text-3xl font-bold mb-6 text-stone-800">4. Key Required Practicals: Methodology & Analysis</h3>
+            <p class="mb-8 text-lg text-stone-600">These practicals are frequently assessed. You must know the method, variables (IV, DV, CV), how to ensure validity and reliability, and potential sources of error and improvements.</p>
+            <div class="space-y-6">
+                <div class="topic-card">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-2">Required Practical: Measuring Reaction Time</h4>
+                    <p class="text-stone-700 mb-3"><strong>Method:</strong> Ruler drop test. One person holds a ruler (e.g., at 0cm mark), the other places their thumb and forefinger at the 0cm mark, ready to catch. The ruler is dropped without warning, and the distance it falls before being caught is measured. Repeat and calculate a mean.</p>
+                    <ul class="list-disc list-inside space-y-1 text-stone-700">
+                        <li><strong>Independent Variable (IV):</strong> The factor being changed (e.g., presence of distractions, caffeine intake, age of person).</li>
+                        <li><strong>Dependent Variable (DV):</strong> The distance the ruler falls (directly related to reaction time - shorter distance = faster reaction).</li>
+                        <li><strong>Control Variables (CVs):</strong> Same ruler, same person dropping, same starting position (0cm at fingers), same lighting, avoiding forewarning.</li>
+                        <li><strong>Improving Reliability:</strong> Repeat many times (e.g., 5-10) and calculate a mean to reduce the impact of anomalies.</li>
+                        <li><strong>Calculating Reaction Time from Distance:</strong> Can be done using the equation `d = 0.5 * g * t<sup>2</sup>` where `d` is distance, `g` is gravity (9.8 m/s<sup>2</sup>), `t` is time. Rearranging for `t = sqrt(2 * d / g)`.</li>
+                    </ul>
+                </div>
+                <div class="topic-card">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-2">Required Practical: Sampling with Quadrats (Estimating Population Size)</h4>
+                    <p class="text-stone-700 mb-3"><strong>Method:</strong> Use a quadrat (e.g., 0.25 m<sup>2</sup>) to sample the population of a non-motile organism (e.g., daisies) in a large area (e.g., field).</p>
+                    <ul class="list-disc list-inside space-y-1 text-stone-700">
+                        <li><strong>Random Sampling:</strong> Crucial to avoid bias. Use random number generators to determine coordinates within the field for placing quadrats. For example, two numbers for X and Y axes on a grid.</li>
+                        <li><strong>Count:</strong> Count the number of organisms (e.g., daisies) in each quadrat.</li>
+                        <li><strong>Repeat:</strong> Take a large number of quadrat samples (e.g., 10-20) for reliable data.</li>
+                        <li><strong>Calculate Mean:</strong> Find the mean number of organisms per quadrat.</li>
+                        <li><strong>Estimate Total Population:</strong> Total population = (Total area of field / Area of one quadrat) × Mean number of organisms per quadrat.</li>
+                    </ul>
+                    <p class="mt-2 text-stone-700"><strong>Example Calculation:</strong> Field area = 100 m<sup>2</sup>, Quadrat area = 0.25 m<sup>2</sup>. Mean daisies per quadrat = 5. <br>Estimated population = `(100 / 0.25) * 5 = 400 * 5 = 2000` daisies.</p>
+                </div>
+                <div class="topic-card">
+                    <h4 class="text-xl font-bold text-emerald-700 mb-2">Required Practical: Effect of Light on Plant Growth (Cress Seeds)</h4>
+                    <p class="text-stone-700 mb-3"><strong>Method:</strong> Set up several petri dishes with moist cotton wool and equal numbers of cress seeds. Place each dish under different light conditions (e.g., full light, partial light, dark). Ensure all other conditions (temperature, water, number of seeds, seed type) are constant. Observe and measure seedling height/growth direction over several days.</p>
+                    <ul class="list-disc list-inside space-y-1 text-stone-700">
+                        <li><strong>Independent Variable (IV):</strong> Light intensity/presence of light.</li>
+                        <li><strong>Dependent Variable (DV):</strong> Height of seedlings, growth direction (phototropism).</li>
+                        <li><strong>Control Variables (CVs):</strong> Temperature, volume of water, type of cress seeds, number of seeds, cotton wool type, petri dish size.</li>
+                        <li><strong>Key Observation:</strong> Seedlings in the dark grow taller (etiolation) but appear yellow (lack chlorophyll due to no light for photosynthesis) and often bend towards light if present.</li>
+                        <li><strong>Error Source:</strong> Uneven watering, temperature fluctuations, seeds not viable.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exam Technique for Grade 8+ -->
+        <section id="exam-technique" class="mb-20 scroll-mt-20">
+            <h3 class="text-3xl font-bold mb-6 text-stone-800">5. Mastering Exam Technique for Grade 8+</h3>
+            <p class="mb-8 text-lg text-stone-600">Achieving top grades isn't just about knowing the content; it's about how you apply it. This section provides critical advice for maximizing your marks.</p>
+            <div class="space-y-4">
+                <details>
+                    <summary>Deconstructing Command Words (Explain, Describe, Suggest, Evaluate)</summary>
+                    <p class="text-stone-700">
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li><strong>Explain:</strong> Provide reasons *why* or *how* something happens. Requires causal links and scientific reasoning. (e.g., "Explain how hormones react to blood sugar conditions.")</li>
+                            <li><strong>Describe:</strong> Give an account of something. Detail what happens in sequence. (e.g., "Describe the process of digestion in the stomach.")</li>
+                            <li><strong>Suggest:</strong> Propose a plausible idea or reason. Often requires applying knowledge to a new scenario. (e.g., "Suggest why a particular adaptation is beneficial.")</li>
+                            <li><strong>Evaluate:</strong> Weigh up advantages and disadvantages. Provide a balanced argument and often a justified conclusion. (e.g., "Evaluate the ethical implications of embryo screening.")</li>
+                            <li><strong>Compare:</strong> State similarities and differences. (e.g., "Compare the nervous and endocrine systems.")</li>
+                        </ul>
+                    </p>
+                </details>
+                <details>
+                    <summary>Strategies for Extended Response Questions (4-6 Marks)</summary>
+                    <p class="text-stone-700">
+                        These questions require detailed, structured answers.
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li><strong>Plan First:</strong> Jot down key points or a mini-mind map before writing.</li>
+                            <li><strong>Use Scientific Terminology:</strong> Precisely and accurately use terms (e.g., 'vasodilation', 'osmosis', 'allele').</li>
+                            <li><strong>Logical Flow:</strong> Ensure your points follow a clear, coherent sequence, especially for processes (e.g., natural selection, reflex arc).</li>
+                            <li><strong>Detail & Depth:</strong> Provide sufficient detail to earn all marks. Don't just list; elaborate.</li>
+                            <li><strong>Address All Parts:</strong> Ensure you answer every aspect of the question.</li>
+                            <li><strong>Link Concepts:</strong> Show how different biological ideas connect (e.g., enzymes in decomposition, hormones in homeostasis).</li>
+                        </ul>
+                    </p>
+                </details>
+                <details>
+                    <summary>Mathematical Skills in Biology</summary>
+                    <p class="text-stone-700">
+                        Biology exams often include calculations.
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li><strong>Rate Calculations:</strong> Change in X / Change in Y (e.g., rate of decomposition, rate of enzyme activity).</li>
+                            <li><strong>Ratios & Percentages:</strong> Common in genetics and ecology.</li>
+                            <li><strong>Population Estimates:</strong> From quadrat data.</li>
+                            <li><strong>Show Working:</strong> Always show your steps for calculations to gain method marks.</li>
+                            <li><strong>Units:</strong> Include correct units in your final answers.</li>
+                        </ul>
+                    </p>
+                </details>
+                <details>
+                    <summary>Common Misconceptions & Pitfalls</summary>
+                    <p class="text-stone-700">
+                        Be aware of these common errors to avoid losing marks:
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li>Confusing independent and dependent variables in practicals.</li>
+                            <li>Not linking a process to its *purpose* or *significance* (e.g., "Why is genetic variation important?").</li>
+                            <li>Using vague language instead of precise scientific terms.</li>
+                            <li>Not explaining *how* or *why* in 'explain' questions.</li>
+                            <li>Failing to use data from graphs/tables to support conclusions.</li>
+                            <li>Misunderstanding negative feedback (it *counteracts* the change, not amplifies it).</li>
+                        </ul>
+                    </p>
+                </details>
+            </div>
+        </section>
+
+        <!-- AI Biology Assistant -->
+        <section id="ai-assistant" class="mb-20 scroll-mt-20">
+            <div class="topic-card">
+                <h3 class="text-xl font-bold text-emerald-700 mb-4">AI Biology Assistant ✨</h3>
+                <p class="mb-4 text-stone-700">Stuck on a question or need a quick recap? Type your biology question below and get instant hints or explanations!</p>
+                <textarea id="ai-question-input" class="w-full p-3 border border-stone-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 mb-4 bg-stone-50 text-stone-800 resize-y" rows="4" placeholder="e.g., Explain the role of ADH in osmoregulation." style="min-height: 100px;"></textarea>
+                <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mb-4">
+                    <button id="btn-get-hint" class="btn-primary px-5 py-2 rounded-lg font-semibold shadow">Get Hint ✨</button>
+                    <button id="btn-get-explanation" class="btn-primary px-5 py-2 rounded-lg font-semibold shadow">Generate Explanation ✨</button>
+                </div>
+                <div id="ai-response-area" class="mt-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200 min-h-[100px] text-stone-700">
+                    <p>Your AI assistant's response will appear here.</p>
+                </div>
+                <div id="loading-spinner" class="loading-spinner"></div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-stone-800 text-white mt-16 p-8 text-center rounded-t-xl shadow-lg">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-lg mb-2">You've covered a lot of ground! Keep reviewing and practicing.</p>
+            <p class="text-sm text-stone-400">Good luck with your exam! You've prepared well for a Grade 8+.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Mobile navigation
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', () => {
+                window.location.href = mobileNav.value;
+            });
+
+            // Active nav link scrolling
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const updateActiveNavLink = () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (pageYOffset >= sectionTop - 100 && pageYOffset < sectionTop + sectionHeight - 100) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + current) {
+                        link.classList.add('active');
+                    }
+                });
+
+                // Update mobile nav selected option
+                if (mobileNav) {
+                    mobileNav.value = '#' + current;
+                }
+            };
+            window.addEventListener('scroll', updateActiveNavLink);
+            updateActiveNavLink(); // Call on load to set initial active link
+
+            // Homeostasis: Blood Glucose Interaction
+            const btnHighSugar = document.getElementById('btn-high-sugar');
+            const btnLowSugar = document.getElementById('btn-low-sugar');
+            const glucoseStimulus = document.getElementById('glucose-stimulus');
+            const glucoseHormone = document.getElementById('glucose-hormone');
+            const glucoseEffect = document.getElementById('glucose-effect');
+
+            btnHighSugar.addEventListener('click', () => {
+                glucoseStimulus.textContent = 'High Blood Sugar (e.g., after a meal)';
+                glucoseStimulus.classList.remove('bg-lime-100', 'bg-red-100', 'bg-amber-100'); // Clean up existing classes
+                glucoseStimulus.classList.add('bg-red-100'); // Use red for high sugar stimulus
+                
+                glucoseHormone.textContent = 'Pancreas (beta cells) releases INSULIN';
+                glucoseHormone.classList.remove('bg-blue-100', 'bg-emerald-200', 'bg-orange-200');
+                glucoseHormone.classList.add('bg-emerald-200'); // Emerald for insulin release
+                
+                glucoseEffect.textContent = 'Liver converts glucose to glycogen; Cells take up glucose. Blood sugar FALLS.';
+                glucoseEffect.classList.remove('bg-orange-100', 'bg-green-200', 'bg-yellow-200');
+                glucoseEffect.classList.add('bg-emerald-200'); // Green for falling blood sugar effect
+            });
+
+            btnLowSugar.addEventListener('click', () => {
+                glucoseStimulus.textContent = 'Low Blood Sugar (e.g., after exercise/fasting)';
+                glucoseStimulus.classList.remove('bg-lime-100', 'bg-red-100', 'bg-amber-100');
+                glucoseStimulus.classList.add('bg-amber-100'); // Use amber for low sugar stimulus
+                
+                glucoseHormone.textContent = 'Pancreas (alpha cells) releases GLUCAGON';
+                glucoseHormone.classList.remove('bg-blue-100', 'bg-emerald-200', 'bg-orange-200');
+                glucoseHormone.classList.add('bg-orange-200'); // Orange for glucagon release
+                
+                glucoseEffect.textContent = 'Liver converts glycogen to glucose. Blood sugar RISES.';
+                glucoseEffect.classList.remove('bg-orange-100', 'bg-green-200', 'bg-yellow-200');
+                glucoseEffect.classList.add('bg-lime-200'); // Lime for rising blood sugar effect
+            });
+
+            // Homeostasis: Brain Interaction
+            const brainHotspots = document.querySelectorAll('.brain-hotspot');
+            const brainInfo = document.getElementById('brain-info');
+            const brainData = {
+                cortex: {
+                    name: 'Cerebral Cortex',
+                    desc: 'The outer layer of the brain, responsible for higher-level functions such as consciousness, intelligence, memory, language, and voluntary movement. Damage here can impair specific cognitive abilities but is not always fatal.'
+                },
+                cerebellum: {
+                    name: 'Cerebellum',
+                    desc: 'Located at the back of the brain, this region coordinates muscular activity, balance, and fine motor skills. Damage can lead to jerky, uncoordinated movements and problems with balance.'
+                },
+                medulla: {
+                    name: 'Medulla Oblongata',
+                    desc: 'Part of the brainstem, it controls vital involuntary functions such as breathing rate, heart rate, and blood pressure. Due to its essential roles, damage to the medulla is often life-threatening or immediately fatal.'
+                }
+            };
+
+            brainHotspots.forEach(button => {
+                button.addEventListener('click', () => {
+                    const brainPart = button.dataset.brain;
+                    brainInfo.innerHTML = `
+                        <div class="text-left">
+                           <h5 class="font-bold text-lg text-emerald-800">${brainData[brainPart].name}</h5>
+                           <p class="mt-2 text-stone-700">${brainData[brainPart].desc}</p>
+                        </div>
+                    `;
+                    // Reset all hotspots to default transparency
+                    brainHotspots.forEach(btn => btn.style.backgroundColor = 'rgba(6, 95, 70, 0.6)');
+                    // Highlight the clicked one with higher opacity
+                    button.style.backgroundColor = 'rgba(6, 95, 70, 0.9)';
+                });
+            });
+
+            // Inheritance: Punnett Square
+            const parent1Select = document.getElementById('parent1-punnett');
+            const parent2Select = document.getElementById('parent2-punnett');
+
+            function updatePunnettSquare() {
+                const p1 = parent1Select.value;
+                const p2 = parent2Select.value;
+
+                const p1a1 = p1.charAt(0);
+                const p1a2 = p1.charAt(1);
+                const p2a1 = p2.charAt(0);
+                const p2a2 = p2.charAt(1);
+
+                document.getElementById('p1a1-th').textContent = p1a1;
+                document.getElementById('p1a2-th').textContent = p1a2;
+                document.getElementById('p2a1-th').textContent = p2a1;
+                document.getElementById('p2a2-th').textContent = p2a2;
+                
+                const sq1 = [p1a1, p2a1].sort().join('');
+                const sq2 = [p1a1, p2a2].sort().join('');
+                const sq3 = [p1a2, p2a1].sort().join('');
+                const sq4 = [p1a2, p2a2].sort().join('');
+                
+                document.getElementById('sq1').textContent = sq1;
+                document.getElementById('sq2').textContent = sq2;
+                document.getElementById('sq3').textContent = sq3;
+                document.getElementById('sq4').textContent = sq4;
+
+                const outcomes = [sq1, sq2, sq3, sq4];
+                const genotypeCounts = {};
+                outcomes.forEach(g => { genotypeCounts[g] = (genotypeCounts[g] || 0) + 1; });
+
+                let resultText = "Genotype Ratio: ";
+                const genotypes = Object.keys(genotypeCounts).sort();
+                genotypes.forEach((g, index) => {
+                    resultText += `${genotypeCounts[g]}`;
+                    if (index < genotypes.length - 1) resultText += ":";
+                });
+                resultText += " | Phenotype Ratio (assuming simple dominant/recessive): ";
+
+                let dominantPhenotypeCount = 0;
+                let recessivePhenotypeCount = 0;
+                const dominantAllele = p1.charAt(0).toUpperCase(); // Assuming first char of p1 is a dominant allele if uppercase
+                
+                outcomes.forEach(g => {
+                    if (g.includes(dominantAllele)) { // If contains dominant allele
+                        dominantPhenotypeCount++;
+                    } else { // Homozygous recessive
+                        recessivePhenotypeCount++;
+                    }
+                });
+                
+                if (dominantPhenotypeCount > 0 && recessivePhenotypeCount > 0) {
+                     resultText += `${dominantPhenotypeCount}:${recessivePhenotypeCount} (Dominant:Recessive)`;
+                } else if (dominantPhenotypeCount === 4) {
+                     resultText += `4:0 (Dominant:Recessive) | 100% Dominant`;
+                } else if (recessivePhenotypeCount === 4) {
+                     resultText += `0:4 (Dominant:Recessive) | 100% Recessive`;
+                } else {
+                    resultText += `Error in phenotype calculation.`; // Should not happen with valid inputs
+                }
+
+                document.getElementById('punnett-results').textContent = resultText;
+            }
+
+            parent1Select.addEventListener('change', updatePunnettSquare);
+            parent2Select.addEventListener('change', updatePunnettSquare);
+            updatePunnettSquare();
+
+
+            // Ecology: Decomposition Chart
+            const tempSlider = document.getElementById('temp-slider');
+            const tempValue = document.getElementById('temp-value');
+            const ctx = document.getElementById('decomposition-chart').getContext('2d');
+            let decompositionChart;
+
+            const baseData = [0, 5, 10, 14, 17, 19, 20, 20.5]; // Data for optimum temp (e.g. 35C) - adjusted for better visual scaling
+            const days = ['Day 0', 'Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
+
+            function calculateDecompositionData(temp) {
+                const optimumTemp = 30; // Adjusted optimum temp for this model
+                const maxRateFactor = 1.0;
+                const enzymeDenatureStart = 45; // Temp at which enzymes start to denature
+                const enzymeDenatureEnd = 60; // Corrected variable name
+                
+                let rateModifier;
+                if (temp <= optimumTemp) {
+                    rateModifier = temp / optimumTemp;
+                } else if (temp > optimumTemp && temp <= enzymeDenatureStart) {
+                    rateModifier = maxRateFactor - ((temp - optimumTemp) / (enzymeDenatureStart - optimumTemp)) * 0.4; // Gradual decrease
+                } else if (temp > enzymeDenatureStart && temp <= enzymeDenatureEnd) {
+                    rateModifier = 0.6 - ((temp - enzymeDenatureStart) / (enzymeDenatureEnd - enzymeDenatureStart)) * 0.5; // Corrected variable name
+                } else {
+                    rateModifier = 0.1; // Very low activity
+                }
+                
+                rateModifier = Math.max(0.05, rateModifier); // Ensure it doesn't go to zero immediately
+
+                return baseData.map(val => (val * rateModifier).toFixed(1));
+            }
+            
+            function createOrUpdateChart() {
+                const temp = parseInt(tempSlider.value);
+                tempValue.textContent = temp;
+                const chartData = calculateDecompositionData(temp);
+
+                if (decompositionChart) {
+                    decompositionChart.data.datasets[0].data = chartData;
+                    decompositionChart.update();
+                } else {
+                    decompositionChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: days,
+                            datasets: [{
+                                label: 'Mass Lost (g)',
+                                data: chartData,
+                                borderColor: '#022c22', /* Darker Forest Green: Emerald-900 */
+                                backgroundColor: 'rgba(2, 44, 34, 0.2)', /* Darker Forest Green with transparency */
+                                tension: 0.3,
+                                fill: true,
+                                pointBackgroundColor: '#4d7c0f', /* Moss Green: Lime-700 */
+                                pointBorderColor: '#4d7c0f',
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Total Mass Lost (g)',
+                                        color: '#292524', /* Stone-800 */
+                                        font: { size: 14, weight: 'bold' }
+                                    },
+                                    grid: { color: '#e5e7eb' }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Time (Days)',
+                                        color: '#292524', /* Stone-800 */
+                                        font: { size: 14, weight: 'bold' }
+                                    },
+                                    grid: { color: '#e5e7eb' }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    titleColor: 'white',
+                                    bodyColor: 'white',
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `Mass Lost: ${context.parsed.y} g`;
+                                        },
+                                        title: function(context) {
+                                            return `Day ${context.dataIndex}`;
+                                        }
+                                    }
+                                }
+                            },
+                            animation: {
+                                duration: 800, // Animation duration in milliseconds
+                                easing: 'easeOutQuart', // Easing function
+                            }
+                        }
+                    });
+                }
+            }
+            
+            tempSlider.addEventListener('input', createOrUpdateChart);
+            createOrUpdateChart();
+
+            // Ecology: Plant Hormones toggle
+            function toggleHormoneInfo(id) {
+                const element = document.getElementById(id);
+                // Ensure a transition property is set for max-height and opacity in CSS
+                // and then toggle the 'open' class
+                if (element.classList.contains('open')) {
+                    element.classList.remove('open');
+                } else {
+                    element.classList.add('open');
+                }
+            }
+            // Expose to global scope for onclick attributes
+            window.toggleHormoneInfo = toggleHormoneInfo;
+
+            // Gemini API Integration for AI Biology Assistant
+            const aiQuestionInput = document.getElementById('ai-question-input');
+            const btnGetHint = document.getElementById('btn-get-hint');
+            const btnGetExplanation = document.getElementById('btn-get-explanation');
+            const aiResponseArea = document.getElementById('ai-response-area');
+            const loadingSpinner = document.getElementById('loading-spinner');
+
+            async function callGeminiApi(promptText, type) {
+                aiResponseArea.innerHTML = ''; // Clear previous response
+                loadingSpinner.style.display = 'block'; // Show spinner
+
+                let chatHistory = [];
+                let prompt = "";
+
+                if (type === 'hint') {
+                    prompt = `You are a helpful GCSE Biology tutor. The user has asked the following question: "${promptText}". Provide a concise hint to guide them towards the answer without giving it away directly.`;
+                } else if (type === 'explanation') {
+                    prompt = `You are a helpful GCSE Biology tutor. The user has asked the following question: "${promptText}". Provide a detailed and accurate explanation or answer to this question, suitable for a GCSE Grade 8+ student. Ensure clarity and use appropriate scientific terminology.`;
+                }
+
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "AIzaSyBRltt9KUIiMdtpMGciBCPC3r8lNTZG7b8"; // Canvas will automatically provide this at runtime
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        aiResponseArea.innerHTML = `<p class="text-stone-700">${text}</p>`;
+                    } else {
+                        aiResponseArea.innerHTML = '<p class="text-red-600">Error: Could not get a response from the AI assistant. Please try again.</p>';
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API:', error);
+                    aiResponseArea.innerHTML = `<p class="text-red-600">An error occurred: ${error.message}. Please check your internet connection and try again.</p>`;
+                } finally {
+                    loadingSpinner.style.display = 'none'; // Hide spinner
+                }
+            }
+
+            btnGetHint.addEventListener('click', () => {
+                const question = aiQuestionInput.value.trim();
+                if (question) {
+                    callGeminiApi(question, 'hint');
+                } else {
+                    aiResponseArea.innerHTML = '<p class="text-red-600">Please enter a question to get a hint.</p>';
+                }
+            });
+
+            btnGetExplanation.addEventListener('click', () => {
+                const question = aiQuestionInput.value.trim();
+                if (question) {
+                    callGeminiApi(question, 'explanation');
+                } else {
+                    aiResponseArea.innerHTML = '<p class="text-red-600">Please enter a question to get an explanation.</p>';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
